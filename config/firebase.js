@@ -1,14 +1,19 @@
-import Constants from "expo-constants";
-import firebase from "firebase/app";
+import { initializeApp } from "firebase/app";
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-import 'firebase/auth';
-import 'firebase/firestore';
+import 'dotenv/config';
 
-const {firebaseConfig} = Constants.expoConfig.extra
-console.log(firebaseConfig)
+const firebaseConfig = {
+  apiKey: process.env.apiKey,
+  authDomain: process.env.authDomain,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId
+}
 
-firebase.initializeApp(firebaseConfig);
-
-export const auth = firebase.auth()
-export const db = firebase.firestore()
-export default firebase
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
