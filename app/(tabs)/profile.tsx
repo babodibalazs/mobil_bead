@@ -1,16 +1,16 @@
 import useUser from "@/hooks/useUser";
 import { useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View, } from "react-native";
- 
-const Index = () => {
+
+const Profile = () => {
   const [email, setEmail] = useState("")
   const [password, setPasword] = useState("")
   const [loggedIn, setLoggedIn] = useState(false)
   const [error, setError] = useState("")
-  const {login} = useUser()
-
+  
   const login_action = () => {
     setError("")
+    const {login} = useUser()
 
     let email_regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
     let email_check = email.match(email_regex)
@@ -69,4 +69,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Index;
+export default Profile;
