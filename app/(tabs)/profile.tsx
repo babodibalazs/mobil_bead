@@ -1,6 +1,6 @@
 import useUser from "@/hooks/useUser";
 import { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View, } from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
 const Profile = () => {
   const [email, setEmail] = useState("asd@asd.com")
@@ -9,7 +9,6 @@ const Profile = () => {
   const [error, setError] = useState("")
   const {login, logout} = useUser()
 
-  
   const login_action = () => {
     setError("")
   
@@ -20,8 +19,8 @@ const Profile = () => {
     // console.log(email_check?.[0])
     
     if (email_check != null) {
-      setLoggedIn(true)
       login({email, password})
+      setLoggedIn(true)
     } else {
       setError("Wrong email format")
     }
@@ -40,7 +39,7 @@ const Profile = () => {
     return (
       <View style={styles.base_view}>
         <Text style={styles.text}>Logged in as {email}</Text>
-        <Button title="Logout" onPress={(e) => logout()} />
+        <Button title="Logout" onPress={(e) => {logout(), setLoggedIn(false)}} />
       </View>
     )
   }

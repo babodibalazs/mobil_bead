@@ -4,9 +4,8 @@ import UserProvider from '../utils/userContext';
 
 export default function RootLayout() {
   return <UserProvider>
-
-  <Stack>
-    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-  </Stack>
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   </UserProvider> 
 };
