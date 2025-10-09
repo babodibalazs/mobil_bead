@@ -3,15 +3,16 @@ import { useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View, } from "react-native";
 
 const Profile = () => {
-  const [email, setEmail] = useState("")
-  const [password, setPasword] = useState("")
+  const [email, setEmail] = useState("asd@asd.com")
+  const [password, setPasword] = useState("asdasd")
   const [loggedIn, setLoggedIn] = useState(false)
   const [error, setError] = useState("")
+  const {login, logout} = useUser()
+
   
   const login_action = () => {
     setError("")
-    const {login} = useUser()
-
+  
     let email_regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
     let email_check = email.match(email_regex)
 
@@ -39,7 +40,7 @@ const Profile = () => {
     return (
       <View style={styles.base_view}>
         <Text style={styles.text}>Logged in as {email}</Text>
-        <Button title="Logout" onPress={(e) => setLoggedIn(false)} />
+        <Button title="Logout" onPress={(e) => logout()} />
       </View>
     )
   }

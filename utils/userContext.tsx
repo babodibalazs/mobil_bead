@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { createContext, useReducer } from 'react';
 
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import userReducer, { SIGN_IN, SIGN_OUT, initialState } from './userReducer';
 
@@ -10,10 +11,11 @@ const UserProvider = (props) => {
   const [user, dispatch] = useReducer(userReducer, initialState)
 
   const authContext = {
-    login: async({userName, password}) => {
-      const { user } = await auth.sighInWithEmailAndPassword(userName, password)
+    login: async({email, password}) => {
+      const { user } = await signInWithEmailAndPassword(auth, email, password)
       const token = await user.getIdToken()
       await SecureStore.setItemAsync('userToken', token)
+      console.log(token)
       dispatch({type: SIGN_IN, payload: token})
     },
     logout: async() => {
