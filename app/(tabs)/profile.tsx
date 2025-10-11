@@ -1,6 +1,10 @@
-import useUser from "@/hooks/useUser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
+import useUser from "../../hooks/useUser";
+
+import sleep from "@/utils/sleep";
 import { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 
 const Profile = () => {
   const [email, setEmail] = useState("asd@asd.com")
@@ -9,7 +13,7 @@ const Profile = () => {
   const [error, setError] = useState("")
   const {login, logout} = useUser()
 
-  const login_action = () => {
+  const login_action = async () => {
     setError("")
   
     let email_regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
@@ -20,7 +24,17 @@ const Profile = () => {
     
     if (email_check != null) {
       login({email, password})
-      setLoggedIn(true)
+      setError("Checking credentials...")
+      await sleep(1000)
+      if (Platform.OS === "web") {
+        setLoggedIn(await AsyncStorage.getItem('userToken') != null)
+      } else {
+        setLoggedIn(await SecureStore.getItemAsync('userToken') != null)
+      }
+      setError("")
+      if (!loggedIn) {
+        setError("Wrong password")
+      }
     } else {
       setError("Wrong email format")
     }

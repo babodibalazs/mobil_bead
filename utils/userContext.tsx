@@ -14,14 +14,15 @@ const UserProvider = (props: any) => {
 
   const authContext = {
     login: async({email, password}) => {
-      const { user } = await signInWithEmailAndPassword(auth, email, password)
-      const token = await user.getIdToken()
-      if (Platform.OS === "web") {
-        await AsyncStorage.setItem('userToken', token)
-      } else {
-        await SecureStore.setItemAsync('userToken', token)
-      }
-      dispatch({type: SIGN_IN, payload: token})
+      await signInWithEmailAndPassword(auth, email, password).then(async (userCred) => {
+        const token = await userCred.user.getIdToken()
+          if (Platform.OS === "web") {
+            await AsyncStorage.setItem('userToken', token)
+          } else {
+            await SecureStore.setItemAsync('userToken', token)
+          }
+        dispatch({type: SIGN_IN, payload: token})
+      }).catch((err: Error) => {console.log(err.message)})
     },
     logout: async() => {
       await auth.signOut()
