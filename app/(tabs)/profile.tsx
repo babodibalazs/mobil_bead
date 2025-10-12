@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from 'expo-secure-store';
 import useUser from "../../hooks/useUser";
 
-import sleep from "@/utils/sleep";
 import { useState } from "react";
 import { Button, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -19,13 +18,8 @@ const Profile = () => {
     let email_regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
     let email_check = email.match(email_regex)
 
-    // console.log(email)
-    // console.log(email_check?.[0])
-    
     if (email_check != null) {
-      login({email, password})
-      setError("Checking credentials...")
-      await sleep(1000)
+      await login({email, password})
       if (Platform.OS === "web") {
         setLoggedIn(await AsyncStorage.getItem('userToken') != null)
       } else {
@@ -33,7 +27,7 @@ const Profile = () => {
       }
       setError("")
       if (!loggedIn) {
-        setError("Wrong password")
+        setError("Invalid credentials")
       }
     } else {
       setError("Wrong email format")
@@ -53,7 +47,7 @@ const Profile = () => {
     return (
       <View style={styles.base_view}>
         <Text style={styles.text}>Logged in as {email}</Text>
-        <Button title="Logout" onPress={(e) => {logout(), setLoggedIn(false)}} />
+        <Button title="Logout" onPress={(e) => {logout(), setLoggedIn(false), setError("")}} />
       </View>
     )
   }
