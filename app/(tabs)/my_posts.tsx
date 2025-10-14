@@ -19,19 +19,12 @@ export default function My_Posts() {
 
   if (initializing) return null;
 
-  if (user != undefined) {
-    return (
-      <View style={styles.base}>
-        <Text>Welcome {user.email}</Text>
-      </View>
-    );
-  } else {
-    return (
-      <View style={styles.base}>
-        <Text>Welcome Guest</Text>
-      </View>
-    );
-  }
+  return (
+    <View style={styles.base}>
+      <Text style={styles.text}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
+      <Text style={{color: "red", fontWeight: "bold"}}>{(user != undefined) ? "" : "Guests can't view previuos posts"}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -39,5 +32,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  text: {
+    fontWeight: "bold"
   }
 })

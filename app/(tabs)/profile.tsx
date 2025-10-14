@@ -19,6 +19,7 @@ const Profile = () => {
     let email_check = email.match(email_regex)
 
     if (email_check != null) {
+      setError("Loading...")
       await login({email, password})
       if (Platform.OS === "web") {
         setLoggedIn(await AsyncStorage.getItem('userToken') != null)
@@ -68,7 +69,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white"
   },
   text: {
-    padding: 10
+    padding: 10,
+    fontWeight: "bold"
   },
   error: {
     color: "red",
