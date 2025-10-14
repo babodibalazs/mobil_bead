@@ -1,13 +1,14 @@
 import { auth, db } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function Index() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
   const [comment, setComment] = useState("")
+  const [comments, setComments] = useState({})
 
   function handleAuthStateChanged(user) {
     setUser(user);
@@ -27,6 +28,15 @@ export default function Index() {
   }
 
   useEffect(() => {
+    const get = async () => {
+    const querySnapshot = await getDocs(collection(db, "users"));
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      setComments({...comments, data: data})
+    })}
+    
+    get()
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged);
     return subscriber;
   }, []);
@@ -38,6 +48,10 @@ export default function Index() {
       <Text style={styles.text}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
       <TextInput style={styles.input} value={comment} onChangeText={setComment}/>
       <Button title="Submit" onPress={(e) => {submit()}} />
+      <FlatList
+        data={[comments]}
+        renderItem={({item}) => <Text>{item.data}</Text>}
+      />
     </View>
   );
 }
