@@ -1,7 +1,7 @@
 import { auth, db } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { addDoc, collection, getDocs, query } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import { Button, FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function Index() {
@@ -27,14 +27,26 @@ export default function Index() {
     }
   }
 
+  type ItemProps = {title: string};
+
+  const Item = ({title}: ItemProps) => (
+    <View style={styles.base}>
+      <Text style={styles.text}>{title}</Text>
+    </View>
+  );
+
   useEffect(() => {
     const get = async () => {
-    const querySnapshot = await getDocs(collection(db, "users"));
+      const q = query(collection(db, "comments"))
+      const querySnapshot = await getDocs(q);
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data()
-      setComments({...comments, data: data})
-    })}
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        setComments(doc.data())
+      });
+      
+    }
     
     get()
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged);
@@ -50,7 +62,8 @@ export default function Index() {
       <Button title="Submit" onPress={(e) => {submit()}} />
       <FlatList
         data={[comments]}
-        renderItem={({item}) => <Text>{item.data}</Text>}
+        renderItem={({item}) => <Item title={item.data} />}
+        keyExtractor={item => item.id}
       />
     </View>
   );
