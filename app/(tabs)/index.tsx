@@ -32,18 +32,18 @@ export default function Index() {
     const q = query(collection(db, "comments"))
     const querySnapshot = await getDocs(q);
 
+    var temp = []
     querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, " => ", doc.data());
-      setComments(doc.data())
+      temp.push(doc.data())
     });
+    setComments(temp)
   }
 
   type ItemProps = {title: string};
 
   const Item = ({title}: ItemProps) => (
-    <View style={styles.base}>
-      <Text style={styles.text}>{title}</Text>
+    <View style={styles.item}>
+      <Text style={styles.item_text}>{title}</Text>
     </View>
   );
 
@@ -60,11 +60,13 @@ export default function Index() {
       <Text style={styles.text}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
       <TextInput style={styles.input} value={comment} onChangeText={setComment}/>
       <Button title="Submit" onPress={(e) => {submit()}} />
-      <FlatList
-        data={[comments]}
-        renderItem={({item}) => <Item title={item.data} />}
-        keyExtractor={item => item.id}
-      />
+      <View style={styles.list}>
+        <FlatList
+          data={comments}
+          renderItem={({item}) => <Item title={item.comment} />}
+          keyExtractor={item => item.id}
+        />
+      </View>
     </View>
   );
 }
@@ -85,5 +87,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     backgroundColor: "white"
+  },
+  list: {
+    flex: 1,
+    paddingTop: 22,
+  },
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
+  },
+  item_text: {
+    fontStyle: "italic"
   },
 })
