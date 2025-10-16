@@ -39,11 +39,12 @@ export default function Index() {
     setComments(temp)
   }
 
-  type ItemProps = {title: string};
+  type ItemProps = {user: string, comment: string};
 
-  const Item = ({title}: ItemProps) => (
+  const Item = ({user, comment}: ItemProps) => (
     <View style={styles.item}>
-      <Text style={styles.item_text}>{title}</Text>
+      <Text style={styles.item_text}>{user}</Text>
+      <Text style={styles.item_text}>{comment}</Text>
     </View>
   );
 
@@ -63,7 +64,7 @@ export default function Index() {
       <View style={styles.list}>
         <FlatList
           data={comments}
-          renderItem={({item}) => <Item title={item.comment} />}
+          renderItem={({item}) => <Item user={item.user} comment={item.comment} />}
           keyExtractor={item => item.id}
         />
       </View>
