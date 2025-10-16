@@ -21,10 +21,22 @@ export default function Index() {
         user: (user != undefined) ? user.email : "Guest",
         comment: comment
       });
+      get()
       console.log("Document written with ID: ", docRef.id);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
+  }
+
+  const get = async () => {
+    const q = query(collection(db, "comments"))
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      console.log(doc.id, " => ", doc.data());
+      setComments(doc.data())
+    });
   }
 
   type ItemProps = {title: string};
@@ -36,18 +48,6 @@ export default function Index() {
   );
 
   useEffect(() => {
-    const get = async () => {
-      const q = query(collection(db, "comments"))
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, " => ", doc.data());
-        setComments(doc.data())
-      });
-      
-    }
-    
     get()
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged);
     return subscriber;
