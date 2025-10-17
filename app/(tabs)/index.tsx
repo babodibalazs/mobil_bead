@@ -44,8 +44,8 @@ export default function Index() {
 
   const Item = ({user, comment, date}: ItemProps) => (
     <View style={styles.item}>
-      <Text style={styles.item_text}>{user + " (" + date.toDate().toDateString() + ")"}</Text>
-      <Text style={styles.item_text}>{comment}</Text>
+      <Text style={styles.item_user}>{user + " (" + date.toDate().toDateString() + ")"}</Text>
+      <Text style={styles.item_comment}>{comment}</Text>
     </View>
   );
 
@@ -59,7 +59,7 @@ export default function Index() {
 
   return (
     <View style={styles.base}>
-      <Text style={styles.text}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
+      <Text style={styles.welcome}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
       <TextInput style={styles.input} value={comment} onChangeText={setComment}/>
       <Button title="Submit" onPress={(e) => {submit()}} />
       <View style={styles.list}>
@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  text: {
+  welcome: {
+    paddingTop: 4,
     fontWeight: "bold"
   },
   input: {
@@ -92,14 +93,25 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
+    flexDirection: "row",
+    width: "90%",
     paddingTop: 22,
   },
   item: {
-    padding: 10,
+    flex: 1,
+    flexDirection: "column",
     fontSize: 18,
     height: 44,
+    borderColor: "black",
+    borderWidth: 2
   },
-  item_text: {
-    fontStyle: "italic"
+  item_user: {
+    fontStyle: "italic",
+    padding: 4,
+    borderColor: "black",
+    borderBottomWidth: 1
+  },
+  item_comment : {
+    padding: 4,
   },
 })
