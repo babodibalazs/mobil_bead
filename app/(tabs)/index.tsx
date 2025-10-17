@@ -50,8 +50,8 @@ export default function Index() {
   );
 
   useEffect(() => {
-    get()
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged);
+    get()
     return subscriber;
   }, []);
 
@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "90%",
     paddingTop: 22,
+    paddingBottom: 10
   },
   item: {
     flex: 1,
