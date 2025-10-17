@@ -10,7 +10,7 @@ const Profile = () => {
   const [password, setPasword] = useState("asdasd")
   const [loggedIn, setLoggedIn] = useState(false)
   const [error, setError] = useState("")
-  const {login, logout} = useUser()
+  const { signup, login, logout} = useUser()
 
   const login_action = async () => {
     setError("")
@@ -34,13 +34,39 @@ const Profile = () => {
       setError("Wrong email format")
     }
   }
+
+  const signup_action = async () => {
+    setError("")
+  
+    let email_regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+    let email_check = email.match(email_regex)
+
+    if (email_check != null) {
+      setError("Loading...")
+      await signup({email, password})
+      if (Platform.OS === "web") {
+        setLoggedIn(await AsyncStorage.getItem('userToken') != null)
+      } else {
+        setLoggedIn(await SecureStore.getItemAsync('userToken') != null)
+      }
+      setError("")
+      if (!loggedIn) {
+        setError("Invalid credentials")
+      }
+    } else {
+      setError("Wrong email format")
+    }
+  }
   
   if (!loggedIn) {
     return (
       <View style={styles.base_view}>
         <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail}/>
         <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPasword}/>
-        <Button title="Login" onPress={(e) => login_action()} />
+        <View>
+          <Button title="Login" onPress={(e) => login_action()} />
+          <Button title="Signup" onPress={(e) => signup_action()} />
+        </View>
         <Text style={styles.error}>{error}</Text>
       </View>
     );

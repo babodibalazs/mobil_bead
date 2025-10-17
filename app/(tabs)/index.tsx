@@ -60,7 +60,7 @@ export default function Index() {
   return (
     <View style={styles.base}>
       <Text style={styles.welcome}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
-      <TextInput style={styles.input} value={comment} onChangeText={setComment}/>
+      <TextInput multiline style={styles.input} value={comment} onChangeText={setComment}/>
       <Button title="Submit" onPress={(e) => {submit()}} />
       <View style={styles.list}>
         <FlatList
@@ -84,8 +84,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
   input: {
-    height: "auto",
-
+    width: "80%",
+    height: 100,
+    justifyContent: "flex-start",
     margin: 6,
     borderWidth: 1,
     padding: 10,

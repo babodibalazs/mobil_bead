@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { createContext, useReducer } from 'react';
 import { Platform } from 'react-native';
 
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import userReducer, { SIGN_IN, SIGN_OUT, initialState } from './userReducer';
 
@@ -13,6 +13,17 @@ const UserProvider = (props: any) => {
   const [user, dispatch] = useReducer(userReducer, initialState)
 
   const authContext = {
+    signup: async({email, password}) => {
+      await createUserWithEmailAndPassword(auth, email, password).then(async (userCred) => {
+        const token = await userCred.user.getIdToken()
+          if (Platform.OS === "web") {
+            await AsyncStorage.setItem('userToken', token)
+          } else {
+            await SecureStore.setItemAsync('userToken', token)
+          }
+        dispatch({type: SIGN_IN, payload: token})
+      }).catch((err: Error) => {console.log(err.message)})
+    },
     login: async({email, password}) => {
       await signInWithEmailAndPassword(auth, email, password).then(async (userCred) => {
         const token = await userCred.user.getIdToken()
