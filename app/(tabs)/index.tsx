@@ -103,7 +103,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     fontSize: 18,
-    height: 44,
     borderColor: "black",
     borderWidth: 2
   },
