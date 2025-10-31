@@ -10,7 +10,7 @@ const Profile = () => {
   const [password, setPasword] = useState("asdasd")
   const [loggedIn, setLoggedIn] = useState(false)
   const [error, setError] = useState("")
-  const { signup, login, logout} = useUser()
+  const {signup, login, logout} = useUser()
 
   const login_action = async () => {
     setError("")

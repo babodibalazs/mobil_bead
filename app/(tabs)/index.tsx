@@ -1,38 +1,8 @@
 import { auth, db } from "@/config/firebase";
-import * as Notifications from 'expo-notifications';
 import { onAuthStateChanged } from "firebase/auth";
-import { addDoc, collection, getDocs, orderBy, query, Timestamp } from "firebase/firestore";
+import { addDoc, collection, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { Button, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
-async function sendPushNotification(expoPushToken: string) {
-  const message = {
-    to: expoPushToken,
-    sound: 'default',
-    title: 'Original Title',
-    body: 'And here is the body!',
-    data: { someData: 'goes here' },
-  };
-
-  await fetch('https://exp.host/--/api/v2/push/send', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Accept-encoding': 'gzip, deflate',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(message),
-  });
-}
 
 export default function Index() {
   const [initializing, setInitializing] = useState(true);
@@ -47,19 +17,36 @@ export default function Index() {
 
   const submit = async () => {
     try {
-      const docRef = await addDoc(collection(db, "comments"), {
-        user: (user != undefined) ? user.email : "Guest",
-        comment: comment,
-        post_time: new Date(Date.now())
-      });
-      get()
-      console.log("Document written with ID: ", docRef.id);
+      let userName: string = "Guest"
+      let userImage: string = "default_user.jpg"
+
+      if (user != undefined) {
+        const q = query(collection(db, "users"), where("email", "==", user.email), limit(1))
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.size != 0){
+          querySnapshot.forEach((doc) => { 
+            userName = doc.data()["username"],
+            userImage = doc.data()["img"]
+          })
+        }
+      }
+
+      if (comment != ""){
+        const docRef = await addDoc(collection(db, "comments"), {
+          user: userName,
+          comment: comment,
+          post_time: new Date(Date.now()),
+          img : userImage,
+        });
+        get_comments()
+        console.log("Document written with ID: ", docRef.id);
+      }
     } catch (e) {
       console.error("Error adding document: ", e);
     }
   }
 
-  const get = async () => {
+  const get_comments = async () => {
     const q = query(collection(db, "comments"), orderBy("post_time", "desc"))
     const querySnapshot = await getDocs(q);
 
@@ -70,14 +57,14 @@ export default function Index() {
     setComments(temp)
   }
 
-  type ItemProps = {user: string, comment: string, date: Timestamp};
+  type ItemProps = {user: string, comment: string, date: Timestamp, img: string};
 
-  const Item = ({user, comment, date}: ItemProps) => (
+  const Item = ({user, comment, date, img}: ItemProps) => (
     <View style={styles.item}>
       <View style={styles.item_user_view}>
         <Image
           style={styles.item_image}
-          source={require("C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\images\\default_user.jpg")} 
+          source={require("C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\images\\" + img)}
         />
         <Text style={styles.item_user}>{user}</Text>
         <Text style={styles.item_date}>{"(" + date.toDate().toDateString() + ")"}</Text>
@@ -88,12 +75,12 @@ export default function Index() {
 
   useEffect(() => {
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged);
-    get()
+    get_comments()
     return subscriber;
   }, []);
 
   if (initializing) return null;
-
+ 
   return (
     <View style={styles.base}>
       <Text style={styles.welcome}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
@@ -102,7 +89,7 @@ export default function Index() {
       <View style={styles.list}>
         <FlatList
           data={comments}
-          renderItem={({item}) => <Item user={item.user} comment={item.comment} date={item.post_time} />}
+          renderItem={({item}) => <Item user={item.user} comment={item.comment} date={item.post_time} img={item.img} />}
           keyExtractor={item => item.id}
         />
       </View>
@@ -153,8 +140,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#dddddd"
   },
   item_image: {
-    width: "100%",
-    height: 150,
+    width: 120,
+    height: 120,
+    alignSelf: "center",
     borderColor: "black",
     borderWidth: 1,
   },
