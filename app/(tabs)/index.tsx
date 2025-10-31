@@ -1,8 +1,38 @@
 import { auth, db } from "@/config/firebase";
+import * as Notifications from 'expo-notifications';
 import { onAuthStateChanged } from "firebase/auth";
-import { addDoc, collection, getDocs, query, Timestamp } from "firebase/firestore";
+import { addDoc, collection, getDocs, orderBy, query, Timestamp } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Button, FlatList, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+async function sendPushNotification(expoPushToken: string) {
+  const message = {
+    to: expoPushToken,
+    sound: 'default',
+    title: 'Original Title',
+    body: 'And here is the body!',
+    data: { someData: 'goes here' },
+  };
+
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Accept-encoding': 'gzip, deflate',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(message),
+  });
+}
 
 export default function Index() {
   const [initializing, setInitializing] = useState(true);
@@ -30,7 +60,7 @@ export default function Index() {
   }
 
   const get = async () => {
-    const q = query(collection(db, "comments"))
+    const q = query(collection(db, "comments"), orderBy("post_time", "desc"))
     const querySnapshot = await getDocs(q);
 
     var temp = []
@@ -44,7 +74,14 @@ export default function Index() {
 
   const Item = ({user, comment, date}: ItemProps) => (
     <View style={styles.item}>
-      <Text style={styles.item_user}>{user + " (" + date.toDate().toDateString() + ")"}</Text>
+      <View style={styles.item_user_view}>
+        <Image
+          style={styles.item_image}
+          source={require("C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\images\\default_user.jpg")} 
+        />
+        <Text style={styles.item_user}>{user}</Text>
+        <Text style={styles.item_date}>{"(" + date.toDate().toDateString() + ")"}</Text>
+      </View>
       <Text style={styles.item_comment}>{comment}</Text>
     </View>
   );
@@ -76,6 +113,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   base: {
     flex: 1,
+    backgroundColor: "#eeeeee",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -101,18 +139,36 @@ const styles = StyleSheet.create({
   },
   item: {
     flex: 1,
-    flexDirection: "column",
+    flexDirection: "row",
     fontSize: 18,
     borderColor: "black",
     borderWidth: 2
   },
-  item_user: {
-    fontStyle: "italic",
-    padding: 4,
+  item_user_view: {
+    width: 160,
+    padding: 5,
+    alignContent: "center",
     borderColor: "black",
-    borderBottomWidth: 1
+    borderRightWidth: 1,
+    backgroundColor: "#dddddd"
+  },
+  item_image: {
+    width: "100%",
+    height: 150,
+    borderColor: "black",
+    borderWidth: 1,
+  },
+  item_user: {
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  item_date: {
+    textAlign: "center",
+    fontStyle: "italic",
   },
   item_comment : {
+    flex: 1,
     padding: 4,
+    backgroundColor: "white"
   },
 })

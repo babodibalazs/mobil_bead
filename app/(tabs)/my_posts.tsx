@@ -38,7 +38,6 @@ export default function My_Posts() {
 
   useEffect(() => {
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged);
-    get()
     return subscriber;
   }, []);
 
@@ -62,6 +61,7 @@ export default function My_Posts() {
 const styles = StyleSheet.create({
   base: {
     flex: 1,
+    backgroundColor: "#eeeeee",
     justifyContent: "center",
     alignItems: "center",
   },
