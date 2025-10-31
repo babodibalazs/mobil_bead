@@ -1,6 +1,9 @@
 import { auth, db } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { addDoc, collection, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
+
+import Dictionary from "@/utils/dictionary";
+
 import React, { useEffect, useState } from "react";
 import { Button, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -8,11 +11,26 @@ export default function Index() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
   const [comment, setComment] = useState("")
-  const [comments, setComments] = useState({})
+  const [comments, setComments] = useState([])
+  const [userImages, setUserImages] = useState({})
 
   function handleAuthStateChanged(user) {
     setUser(user);
     if (initializing) setInitializing(false);
+  }
+
+  const getUserImages = async () => {
+    if (comments.length != 0){
+      let temp: Dictionary<string> = {}
+
+      comments.forEach((comm: Dictionary<string>) => {
+        const img = comm["img"]
+        if (temp[img] == undefined){
+          temp[img] = "C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\images\\" + img
+        }
+      })
+      setUserImages(temp)
+    }
   }
 
   const submit = async () => {
@@ -64,7 +82,7 @@ export default function Index() {
       <View style={styles.item_user_view}>
         <Image
           style={styles.item_image}
-          source={require("C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\images\\" + img)}
+          source={require("C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\images\\default_user.jpg")}
         />
         <Text style={styles.item_user}>{user}</Text>
         <Text style={styles.item_date}>{"(" + date.toDate().toDateString() + ")"}</Text>
@@ -72,6 +90,12 @@ export default function Index() {
       <Text style={styles.item_comment}>{comment}</Text>
     </View>
   );
+
+  useEffect(() => {
+    getUserImages()
+    console.log(comments)
+    console.log(userImages)
+  },[comments])
 
   useEffect(() => {
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged);
