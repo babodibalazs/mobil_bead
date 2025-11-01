@@ -26,9 +26,10 @@ export default function Index() {
       comments.forEach((comm: Dictionary<string>) => {
         const img = comm["img"]
         if (temp[img] == undefined){
-          temp[img] = "C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\images\\" + img
+          temp[img] = "C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\profile\\" + img
         }
       })
+      console.log(temp)
       setUserImages(temp)
     }
   }
@@ -57,7 +58,6 @@ export default function Index() {
           img : userImage,
         });
         get_comments()
-        console.log("Document written with ID: ", docRef.id);
       }
     } catch (e) {
       console.error("Error adding document: ", e);
@@ -82,7 +82,7 @@ export default function Index() {
       <View style={styles.item_user_view}>
         <Image
           style={styles.item_image}
-          source={require("C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\images\\default_user.jpg")}
+          source={require(`C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\profile\\${img}`)}
         />
         <Text style={styles.item_user}>{user}</Text>
         <Text style={styles.item_date}>{"(" + date.toDate().toDateString() + ")"}</Text>
@@ -93,7 +93,6 @@ export default function Index() {
 
   useEffect(() => {
     getUserImages()
-    console.log(comments)
     console.log(userImages)
   },[comments])
 
