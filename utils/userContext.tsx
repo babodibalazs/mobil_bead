@@ -1,11 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
 import { createContext, useReducer } from 'react';
-import { Platform } from 'react-native';
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import userReducer, { SIGN_IN, SIGN_OUT, initialState } from './userReducer';
+import userReducer, { ERROR, initialState, SIGN_IN, SIGN_OUT } from './userReducer';
 
 export const UserContext = createContext();
 
@@ -16,33 +13,27 @@ const UserProvider = (props: any) => {
     signup: async({email, password}) => {
       await createUserWithEmailAndPassword(auth, email, password).then(async (userCred) => {
         const token = await userCred.user.getIdToken()
-          if (Platform.OS === "web") {
-            await AsyncStorage.setItem('userToken', token)
-          } else {
-            await SecureStore.setItemAsync('userToken', token)
-          }
         dispatch({type: SIGN_IN, payload: token})
-      }).catch((err: Error) => {console.log(err.message)})
+      }).catch((err: Error) => {
+        const err_type = err.message.substring(17, err.message.length - 2)
+        dispatch({type: ERROR, payload: err_type})
+      })
     },
     login: async({email, password}) => {
       await signInWithEmailAndPassword(auth, email, password).then(async (userCred) => {
         const token = await userCred.user.getIdToken()
-          if (Platform.OS === "web") {
-            await AsyncStorage.setItem('userToken', token)
-          } else {
-            await SecureStore.setItemAsync('userToken', token)
-          }
         dispatch({type: SIGN_IN, payload: token})
-      }).catch((err: Error) => {console.log(err.message)})
+      }).catch((err: Error) => {
+        const err_type = err.message.substring(17, err.message.length - 2)
+        dispatch({type: ERROR, payload: err_type})
+      })
     },
     logout: async() => {
       await auth.signOut()
-      if (Platform.OS === "web") {
-        await AsyncStorage.removeItem('userToken')
-      } else {
-        await SecureStore.deleteItemAsync('userToken')
-      }
       dispatch({type: SIGN_OUT, payload: null})
+    },
+    reset: async() => {
+      dispatch({type: ERROR, payload: null})
     },
     user
   }

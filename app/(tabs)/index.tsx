@@ -82,7 +82,7 @@ export default function Index() {
       <View style={styles.item_user_view}>
         <Image
           style={styles.item_image}
-          source={require(`C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\profile\\${img}`)}
+
         />
         <Text style={styles.item_user}>{user}</Text>
         <Text style={styles.item_date}>{"(" + date.toDate().toDateString() + ")"}</Text>

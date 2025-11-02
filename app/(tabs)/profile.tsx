@@ -1,16 +1,14 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from 'expo-secure-store';
 import useUser from "../../hooks/useUser";
 
 import { useState } from "react";
-import { Button, Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
 const Profile = () => {
   const [email, setEmail] = useState("asd@asd.com")
   const [password, setPasword] = useState("asdasd")
   const [loggedIn, setLoggedIn] = useState(false)
   const [error, setError] = useState("")
-  const {signup, login, logout} = useUser()
+  const {user, signup, login, logout, reset} = useUser()
 
   const login_action = async () => {
     setError("")
@@ -19,16 +17,20 @@ const Profile = () => {
     let email_check = email.match(email_regex)
 
     if (email_check != null) {
+      reset()
       setError("Loading...")
       await login({email, password})
-      if (Platform.OS === "web") {
-        setLoggedIn(await AsyncStorage.getItem('userToken') != null)
+      console.log(user)
+      if (user["error"] == null){
+        setLoggedIn(true)
+        setError("")
       } else {
-        setLoggedIn(await SecureStore.getItemAsync('userToken') != null)
-      }
-      setError("")
-      if (!loggedIn) {
-        setError("Invalid credentials")
+        const type = user["error"]
+        switch (type) {
+          case "auth/too-many-requests": setError("Too many requests"); break
+          case "auth/invalid-credential": setError("Invalid credentials"); break
+          default: setError("Unknown error"); break
+        }
       }
     } else {
       setError("Wrong email format")
@@ -44,11 +46,7 @@ const Profile = () => {
     if (email_check != null) {
       setError("Loading...")
       await signup({email, password})
-      if (Platform.OS === "web") {
-        setLoggedIn(await AsyncStorage.getItem('userToken') != null)
-      } else {
-        setLoggedIn(await SecureStore.getItemAsync('userToken') != null)
-      }
+      setLoggedIn(await user["token"] != null)
       setError("")
       if (!loggedIn) {
         setError("Invalid credentials")
@@ -73,7 +71,7 @@ const Profile = () => {
   } else {
     return (
       <View style={styles.base_view}>
-        <Text style={styles.text}>Logged in as {email}</Text>
+        <Text style={styles.text}>Logged in as: {email}</Text>
         <Button title="Logout" onPress={(e) => {logout(), setLoggedIn(false), setError("")}} />
       </View>
     )
