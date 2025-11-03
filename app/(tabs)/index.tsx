@@ -2,8 +2,8 @@ import { auth, db } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { addDoc, collection, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
 
-import Dictionary from "@/utils/dictionary";
 
+import useImages from "@/hooks/useImages";
 import React, { useEffect, useState } from "react";
 import { Button, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -12,26 +12,11 @@ export default function Index() {
   const [user, setUser] = useState();
   const [comment, setComment] = useState("")
   const [comments, setComments] = useState([])
-  const [userImages, setUserImages] = useState({})
+  const {images, init, addImage} = useImages()
 
   function handleAuthStateChanged(user) {
     setUser(user);
     if (initializing) setInitializing(false);
-  }
-
-  const getUserImages = async () => {
-    if (comments.length != 0){
-      let temp: Dictionary<string> = {}
-
-      comments.forEach((comm: Dictionary<string>) => {
-        const img = comm["img"]
-        if (temp[img] == undefined){
-          temp[img] = "C:\\Users\\Megathor\\OneDrive\\Desktop\\Egyetem\\code\\mobil\\mobil_bead\\assets\\profile\\" + img
-        }
-      })
-      console.log(temp)
-      setUserImages(temp)
-    }
   }
 
   const submit = async () => {
@@ -92,8 +77,8 @@ export default function Index() {
   );
 
   useEffect(() => {
-    getUserImages()
-    console.log(userImages)
+    init()
+    console.log(images)
   },[comments])
 
   useEffect(() => {
