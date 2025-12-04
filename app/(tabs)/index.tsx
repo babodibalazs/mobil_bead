@@ -2,14 +2,33 @@ import { auth, db } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { addDoc, collection, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
 
+import Constants from 'expo-constants';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+
 import React, { useEffect, useState } from "react";
-import { Button, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, FlatList, Image, Platform, StyleSheet, Text, TextInput, View } from "react-native";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function Index() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
   const [comment, setComment] = useState("")
   const [comments, setComments] = useState([])
+
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [channels, setChannels] = useState<Notifications.NotificationChannel[]>([]);
+  const [notification, setNotification] = useState<Notifications.Notification | undefined>(
+    undefined
+  );
 
   function handleAuthStateChanged(user) {
     setUser(user);
@@ -54,6 +73,68 @@ export default function Index() {
     setComments(temp)
   }
 
+  async function schedulePushNotification() {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Random Forum",
+        body: `${(user != undefined) ? user.email : "A Guest"} has just posted`,
+        data: { data: comment, test: { test1: 'more data' } },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 2,
+      },
+    });
+  }
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('myNotificationChannel', {
+        name: 'A channel is needed for the permissions prompt to appear',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+      // Learn more about projectId:
+      // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+      // EAS projectId is used here.
+      try {
+        const projectId =
+          Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+        if (!projectId) {
+          throw new Error('Project ID not found');
+        }
+        token = (
+          await Notifications.getExpoPushTokenAsync({
+            projectId,
+          })
+        ).data;
+        console.log(token);
+      } catch (e) {
+        token = `${e}`;
+      }
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+
+    return token;
+  }
+
   type ItemProps = {user: string, comment: string, date: Timestamp};
 
   const Item = ({user, comment, date}: ItemProps) => (
@@ -76,13 +157,33 @@ export default function Index() {
     return subscriber;
   }, []);
 
+    useEffect(() => {
+    registerForPushNotificationsAsync().then(token => token && setExpoPushToken(token));
+
+    if (Platform.OS === 'android') {
+      Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
+    }
+    const notificationListener = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      notificationListener.remove();
+      responseListener.remove();
+    };
+  }, []);
+
   if (initializing) return null;
  
   return (
     <View style={styles.base}>
       <Text style={styles.welcome}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
       <TextInput multiline style={styles.input} value={comment} onChangeText={setComment}/>
-      <Button title="Submit" onPress={(e) => {submit()}} />
+      <Button title="Submit" onPress={async (e) => {submit(); schedulePushNotification()}} />
       <View style={styles.list}>
         <FlatList
           data={comments}
