@@ -3,11 +3,12 @@ import useImages from "@/hooks/useImages";
 import * as ImagePicker from 'expo-image-picker';
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { Alert, Button, StyleSheet, Text, View } from "react-native";
+import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function Settings() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
+  const [userName, setuserName] = useState();
   const {uploadImage, list} = useImages()
 
   function handleAuthStateChanged(user) {
@@ -48,7 +49,7 @@ export default function Settings() {
   return (
     <View style={styles.base}>
       <Text style={styles.welcome}>Welcome {(user != undefined) ? user.email : "Guest"}</Text>
-      <Text style={{color: "red", fontWeight: "bold"}}>{(user != undefined) ? "" : "Guests can't change their settings"}</Text>
+      <Text style={{color: "red", fontWeight: "bold"}}>{(user != undefined) ? (<TextInput style={styles.input} placeholder="Username" value={userName} onChangeText={setuserName}/>) : "Guests can't change their settings"}</Text>
       <Button title="Upload Profile Image" onPress={pickImage} />
     </View>
   );
@@ -65,6 +66,14 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     paddingBottom: 10,
     fontWeight: "bold"
+  },
+  input: {
+    height: 40,
+    width: 180,
+    margin: 6,
+    borderWidth: 1,
+    padding: 10,
+    backgroundColor: "white"
   },
   list: {
     flex: 1,
