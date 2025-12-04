@@ -1,4 +1,4 @@
-import { ImagesContext } from "@/utils/imagesContext"
+import { ImagesContext } from "@/utils/imageContext"
 import { useContext } from "react"
 
 const useImages = () => {

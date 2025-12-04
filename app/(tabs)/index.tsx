@@ -2,8 +2,6 @@ import { auth, db } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { addDoc, collection, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
 
-
-import useImages from "@/hooks/useImages";
 import React, { useEffect, useState } from "react";
 import { Button, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -12,7 +10,6 @@ export default function Index() {
   const [user, setUser] = useState();
   const [comment, setComment] = useState("")
   const [comments, setComments] = useState([])
-  const {images, init, addImage} = useImages()
 
   function handleAuthStateChanged(user) {
     setUser(user);
@@ -22,15 +19,13 @@ export default function Index() {
   const submit = async () => {
     try {
       let userName: string = "Guest"
-      let userImage: string = "default_user.jpg"
 
       if (user != undefined) {
         const q = query(collection(db, "users"), where("email", "==", user.email), limit(1))
         const querySnapshot = await getDocs(q);
         if (querySnapshot.size != 0){
           querySnapshot.forEach((doc) => { 
-            userName = doc.data()["username"],
-            userImage = doc.data()["img"]
+            userName = doc.data()["username"]
           })
         }
       }
@@ -40,7 +35,6 @@ export default function Index() {
           user: userName,
           comment: comment,
           post_time: new Date(Date.now()),
-          img : userImage,
         });
         get_comments()
       }
@@ -60,14 +54,14 @@ export default function Index() {
     setComments(temp)
   }
 
-  type ItemProps = {user: string, comment: string, date: Timestamp, img: string};
+  type ItemProps = {user: string, comment: string, date: Timestamp};
 
-  const Item = ({user, comment, date, img}: ItemProps) => (
+  const Item = ({user, comment, date}: ItemProps) => (
     <View style={styles.item}>
       <View style={styles.item_user_view}>
         <Image
           style={styles.item_image}
-
+          source={require("./img/default_user.jpg")}
         />
         <Text style={styles.item_user}>{user}</Text>
         <Text style={styles.item_date}>{"(" + date.toDate().toDateString() + ")"}</Text>
@@ -75,11 +69,6 @@ export default function Index() {
       <Text style={styles.item_comment}>{comment}</Text>
     </View>
   );
-
-  useEffect(() => {
-    init()
-    console.log(images)
-  },[comments])
 
   useEffect(() => {
     const subscriber = onAuthStateChanged(auth, handleAuthStateChanged);
@@ -97,7 +86,7 @@ export default function Index() {
       <View style={styles.list}>
         <FlatList
           data={comments}
-          renderItem={({item}) => <Item user={item.user} comment={item.comment} date={item.post_time} img={item.img} />}
+          renderItem={({item}) => <Item user={item.user} comment={item.comment} date={item.post_time} />}
           keyExtractor={item => item.id}
         />
       </View>

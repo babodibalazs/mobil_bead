@@ -1,4 +1,4 @@
-import ImagesProvider from "@/utils/imagesContext";
+import ImagesProvider from "@/utils/imageContext";
 import { Stack } from "expo-router";
 import '../config/firebase';
 import UserProvider from '../utils/userContext';

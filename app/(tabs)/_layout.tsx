@@ -11,9 +11,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="my_posts"
+        name="settings"
         options={{
-          title: 'My Posts'
+          title: 'Settings'
         }}
       />
       <Tabs.Screen
